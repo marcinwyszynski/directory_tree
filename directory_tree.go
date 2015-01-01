@@ -11,7 +11,6 @@ package directory_tree
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 )
 
@@ -48,7 +47,11 @@ func NewTree(root string) (result *Node, err error) {
 		if err != nil {
 			return err
 		}
-		parents[path] = &Node{path, fileInfoFromInterface(info), []*Node{}}
+		parents[path] = &Node{
+			FullPath: path,
+			Info:     fileInfoFromInterface(info),
+			Children: make([]*Node, 0),
+		}
 		return nil
 	}
 	if err = filepath.Walk(absRoot, walkFunc); err != nil {
