@@ -5,7 +5,7 @@
 //	tree, err := directory_tree.NewTree("/home/me")
 //
 // I did my best to keep it OS-independent but truth be told I only tested it
-// on OS X and Debian Linux so mileage may vary. You've been warned.
+// on OS X and Debian Linux so YMMV. You've been warned.
 package directory_tree
 
 import (
@@ -34,12 +34,7 @@ type Node struct {
 	FullPath string    `json:"path"`
 	Info     *FileInfo `json:"info"`
 	Children []*Node   `json:"children"`
-}
-
-// Helper function to get a path's parent path (OS-specific).
-func getParentPath(path string) string {
-	els := strings.Split(path, string(os.PathSeparator))
-	return strings.Join(els[:len(els)-1], string(os.PathSeparator))
+	Parent   *Node     `json:"-"`
 }
 
 // Create directory hierarchy.
@@ -60,11 +55,12 @@ func NewTree(root string) (result *Node, err error) {
 		return
 	}
 	for path, node := range parents {
-		parentPath := getParentPath(path)
+		parentPath := filepath.Dir(path)
 		parent, exists := parents[parentPath]
 		if !exists { // If a parent does not exist, this is the root.
 			result = node
 		} else {
+			node.Parent = parent
 			parent.Children = append(parent.Children, node)
 		}
 	}
